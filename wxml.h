@@ -16,22 +16,24 @@ struct wxml_attrs {
 };
 
 struct wxml_node {
-	wxml_node_t* parent;
-
 	const char* name;
 	wxml_attrs_t attrs;
+
+	wxml_node_t* childs;
+	int child_count;
+
+	const char* content;
 };
 
 struct wxml_doc {
-	wxml_node_t* nodes;
-
-	int node_index;
-	int node_count;
+	wxml_node_t root;
 };
 
 wxml_doc_t    wxml_doc_create();
 char*         wxml_doc_serialize(wxml_doc_t* doc);
-wxml_node_t*  wxml_node_root(wxml_doc_t* doc);
-wxml_node_t*  wxml_node_add(wxml_doc_t* doc, wxml_node_t* parent, const char* name);
-void          wxml_attr_add(wxml_node_t* node, const char* name, const char* value);
 void          wxml_doc_free(wxml_doc_t* doc);
+
+wxml_node_t*  wxml_node_add(wxml_node_t* parent, const char* name, const char* content);
+void          wxml_node_free(wxml_node_t* node);
+
+void          wxml_attr_add(wxml_node_t* node, const char* name, const char* value);
