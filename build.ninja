@@ -1,0 +1,15 @@
+cc = clang
+cflags = -g --std=gnu99 -I. -Wall -Wextra -Wno-missing-field-initializers -Wno-unused-parameter
+
+rule cc
+  command = $cc $cflags -c $in -o $out
+  description = CC $in
+
+rule ld
+  command = $cc $ldflags $in -o $out
+  description = LD $in
+
+build build/wxml.o: cc wxml.c
+build build/test.o: cc test.c
+
+build build/test: ld build/test.o build/wxml.o
