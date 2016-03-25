@@ -1,8 +1,55 @@
 #include "wxml.h"
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+char* strcatalloc(char* dst, const char* src) {
+	int l = dst ? strlen(dst) : 0;
+
+	dst = realloc(dst, l + strlen(src) + 1);
+	strcat(dst, src);
+
+	return dst;
+}
+
+void childs(char** data, wxml_node_t* n) {
+	if(n->name) {
+		*data = strcatalloc(*data, "<");
+		*data = strcatalloc(*data, n->name);
+
+		if(n->attrs.count > 0) {
+			for(int i = 0; i < n->attrs.count; ++i) {
+				char* s = malloc(strlen(n->attrs.names[i]) + strlen(n->attrs.values[i]) + 5);
+				sprintf(s, " %s=\"%s\"", n->attrs.names[i], n->attrs.values[i]);
+
+				*data = strcatalloc(*data, s);
+				free(s);
+			}
+		}
+
+		*data = strcatalloc(*data, ">");
+	}
+
+	if(n->content) {
+		*data = strcatalloc(*data, n->content);
+	}
+	else {
+		for(int i = 0; i < n->child_count; ++i) {
+			wxml_node_t child = n->childs[i];
+			childs(data, &child);
+		}
+	}
+
+	if(n->name) {
+		char* s = malloc(strlen(n->name) + 4);
+		sprintf(s, "</%s>", n->name);
+
+		*data = strcatalloc(*data, s);
+		free(s);
+	}
+}
 
 wxml_doc_t wxml_doc_create() {
 	wxml_doc_t doc;
@@ -16,38 +63,9 @@ wxml_doc_t wxml_doc_create() {
 	return doc;
 }
 
-void childs(wxml_node_t* n) {
-	if(n->name) {
-		printf("<%s", n->name);
-
-		if(n->attrs.count > 0) {
-			for(int i = 0; i < n->attrs.count; ++i) {
-				printf(" %s=\"%s\"", n->attrs.names[i], n->attrs.values[i]);
-			}
-		}
-
-		printf(">");
-	}
-
-	if(n->content) {
-		printf("%s", n->content);
-	}
-	else {
-		for(int i = 0; i < n->child_count; ++i) {
-			wxml_node_t child = n->childs[i];
-			childs(&child);
-		}
-	}
-
-	if(n->name) {
-		printf("</%s>", n->name);
-	}
-}
-
 char* wxml_doc_serialize(wxml_doc_t* doc) {
-	char* data = calloc(1, 1);
-
-	childs(&doc->root);
+	char* data = 0;
+	childs(&data, &doc->root);
 
 	return data;
 }
