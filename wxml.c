@@ -14,7 +14,7 @@ char* strcatalloc(char* dst, const char* src) {
 	return dst;
 }
 
-void childs(char** data, wxml_node_t* n) {
+void child_str(char** data, wxml_node_t* n) {
 	if(n->name) {
 		*data = strcatalloc(*data, "<");
 		*data = strcatalloc(*data, n->name);
@@ -28,17 +28,26 @@ void childs(char** data, wxml_node_t* n) {
 				free(s);
 			}
 		}
-
-		*data = strcatalloc(*data, ">");
 	}
 
-	if(n->content) {
-		*data = strcatalloc(*data, n->content);
+	if(n->child_count == 0) {
+		if(n->content) {
+			*data = strcatalloc(*data, ">");
+			*data = strcatalloc(*data, n->content);
+		}
+		else {
+			*data = strcatalloc(*data, " />");
+			return;
+		}
 	}
 	else {
+		if(n->name) {
+			*data = strcatalloc(*data, ">");
+		}
+
 		for(int i = 0; i < n->child_count; ++i) {
 			wxml_node_t child = n->childs[i];
-			childs(data, &child);
+			child_str(data, &child);
 		}
 	}
 
@@ -65,12 +74,12 @@ wxml_doc_t wxml_doc_create() {
 
 char* wxml_doc_serialize(wxml_doc_t* doc) {
 	char* data = 0;
-	childs(&data, &doc->root);
+	child_str(&data, &doc->root);
 
 	return data;
 }
 
-wxml_node_t* wxml_node_add(wxml_node_t* parent, const char* name, const char* content) {
+wxml_node_t* wxml_node_add(wxml_node_t* parent, const char* name) {
 	if(!parent) {
 		return 0;
 	}
@@ -82,9 +91,13 @@ wxml_node_t* wxml_node_add(wxml_node_t* parent, const char* name, const char* co
 	n->attrs = (wxml_attrs_t){0};
 	n->childs = 0;
 	n->child_count = 0;
-	n->content = content;
+	n->content = 0;
 
 	return n;
+}
+
+void wxml_node_content(wxml_node_t* node, const char* content) {
+	node->content = content;
 }
 
 void wxml_attr_add(wxml_node_t* node, const char* name, const char* value) {

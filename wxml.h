@@ -33,7 +33,8 @@ wxml_doc_t    wxml_doc_create();
 char*         wxml_doc_serialize(wxml_doc_t* doc);
 void          wxml_doc_free(wxml_doc_t* doc);
 
-wxml_node_t*  wxml_node_add(wxml_node_t* parent, const char* name, const char* content);
+wxml_node_t*  wxml_node_add(wxml_node_t* parent, const char* name);
+void          wxml_node_content(wxml_node_t* node, const char* content);
 void          wxml_node_free(wxml_node_t* node);
 
 void          wxml_attr_add(wxml_node_t* node, const char* name, const char* value);
