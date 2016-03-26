@@ -5,7 +5,7 @@
 
 int main(void) {
 	wxml_doc_t doc = wxml_doc_create();
-	wxml_node_t* root = &doc.root;
+	wxml_node_t* root = doc.root;
 
 	wxml_node_t* html = wxml_node_add(root, "html");
 	wxml_attr_add(html, "lang", "fr");
