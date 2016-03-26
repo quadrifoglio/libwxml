@@ -7,9 +7,12 @@
 
 char* strcatalloc(char* dst, const char* src) {
 	int l = dst ? strlen(dst) : 0;
+	int s = strlen(src);
 
-	dst = realloc(dst, l + strlen(src) + 1);
-	strcat(dst, src);
+	dst = realloc(dst, l + s + 1);
+	memcpy(dst + l, src, s);
+
+	dst[l + s] = 0;
 
 	return dst;
 }
@@ -46,8 +49,7 @@ void child_str(char** data, wxml_node_t* n) {
 		}
 
 		for(int i = 0; i < n->child_count; ++i) {
-			wxml_node_t child = n->childs[i];
-			child_str(data, &child);
+			child_str(data, n->childs + i);
 		}
 	}
 
@@ -62,19 +64,20 @@ void child_str(char** data, wxml_node_t* n) {
 
 wxml_doc_t wxml_doc_create() {
 	wxml_doc_t doc;
+	doc.root = malloc(sizeof(wxml_node_t));
 
-	doc.root.name = 0;
-	doc.root.attrs = (wxml_attrs_t){0};
-	doc.root.childs = 0;
-	doc.root.child_count = 0;
-	doc.root.content = 0;
+	doc.root->name = 0;
+	doc.root->attrs = (wxml_attrs_t){0};
+	doc.root->childs = 0;
+	doc.root->child_count = 0;
+	doc.root->content = 0;
 
 	return doc;
 }
 
 char* wxml_doc_serialize(wxml_doc_t* doc) {
 	char* data = 0;
-	child_str(&data, &doc->root);
+	child_str(&data, doc->root);
 
 	return data;
 }
@@ -123,5 +126,6 @@ void wxml_node_free(wxml_node_t* node) {
 }
 
 void wxml_doc_free(wxml_doc_t* doc) {
-	wxml_node_free(&doc->root);
+	wxml_node_free(doc->root);
+	free(doc->root);
 }

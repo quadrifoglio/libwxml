@@ -26,7 +26,7 @@ struct wxml_node {
 };
 
 struct wxml_doc {
-	wxml_node_t root;
+	wxml_node_t* root;
 };
 
 wxml_doc_t    wxml_doc_create();
